@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "FashionXP",
+    "slug": "fashionxp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0B0B0F",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.fashionxp.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "FashionXP uses your camera to analyze outfits and style you.",
+        "NSPhotoLibraryUsageDescription": "FashionXP uses your photos to create and share looks."
+      }
+    },
+    "android": {
+      "package": "com.fashionxp.app",
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "READ_MEDIA_IMAGES"]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow FashionXP to access your camera for outfit styling."
+        }
+      ]
+    ]
+  }
+}
