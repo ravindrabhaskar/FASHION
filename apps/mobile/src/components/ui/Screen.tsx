@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/theme/tokens';
 
@@ -15,8 +15,10 @@ export function Screen({
   scroll?: boolean;
 }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const maxWidth = width >= 1100 ? 1040 : width >= 760 ? 720 : undefined;
   const content = (
-    <>
+    <View style={[styles.content, maxWidth ? { maxWidth, width: '100%' } : null]}>
       {title ? (
         <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.xl }}>
           <Text accessibilityRole="header" style={styles.title}>
@@ -26,7 +28,7 @@ export function Screen({
         </View>
       ) : null}
       {children}
-    </>
+    </View>
   );
 
   return (
@@ -53,6 +55,7 @@ export function Screen({
 
 const styles = StyleSheet.create({
   screen: { backgroundColor: colors.ink, flex: 1 },
+  content: { alignSelf: 'center', flex: 1, width: '100%' },
   title: { ...typography.display, color: colors.textPrimary },
   subtitle: {
     ...typography.body,

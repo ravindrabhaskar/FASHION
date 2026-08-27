@@ -4,12 +4,15 @@ import { api, tokenStore } from '@/api/client';
 import { authApi } from '@/api/endpoints';
 import type { User } from '@/api/types';
 import { colors } from '@/theme/tokens';
+import { registerPushDevice } from '@/state/push';
 
 interface AuthState {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, fullName: string, password: string) => Promise<void>;
+  signInWithOtp: (phone: string, code: string, fullName?: string) => Promise<void>;
+  signInWithProvider: (provider: 'google' | 'apple', idToken: string) => Promise<void>;
   signOutAll: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -33,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!access) return;
         const me = await authApi.me();
         setUser(me);
+        void registerPushDevice();
       } catch {
         await tokenStore.clear();
       } finally {
@@ -48,10 +52,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signIn: async (email, password) => {
         const data = await authApi.login(email, password);
         persistSession(data.access, data.refresh, data.user);
+        void registerPushDevice();
       },
       signUp: async (email, fullName, password) => {
         const data = await authApi.register(email, fullName, password);
         persistSession(data.access, data.refresh, data.user);
+        void registerPushDevice();
+      },
+      signInWithOtp: async (phone, code, fullName) => {
+        const data = await authApi.loginWithOtp(phone, code, fullName);
+        persistSession(data.access, data.refresh, data.user);
+        void registerPushDevice();
+      },
+      signInWithProvider: async (provider, idToken) => {
+        const data = await authApi.socialLogin(provider, idToken);
+        persistSession(data.access, data.refresh, data.user);
+        void registerPushDevice();
       },
       signOutAll: async () => {
         try {

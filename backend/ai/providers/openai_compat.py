@@ -159,3 +159,25 @@ class OpenAICompatibleProvider:
             language=None if language == "en" else language,
         )
         return {"text": response.text or "", "language": language, "duration_seconds": None}
+
+    # ---- Multilingual ---------------------------------------------------
+    def translate(self, *, text: str, target: str, source: str = "") -> dict:
+        """Free-form translation via the configured chat model."""
+        source_hint = f" from {source}" if source else ""
+        response = self._client.chat.completions.create(
+            model=getattr(settings, "OPENAI_TEXT_MODEL", "gpt-4o-mini"),
+            temperature=0,
+            messages=[
+                {"role": "system", "content":
+                    "You are a professional fashion-industry translator. "
+                    "Reply with ONLY the translated text, preserving styling terms."},
+                {"role": "user", "content":
+                    f"Translate{source_hint} into {target}. Text: {text[:1500]}"},
+            ],
+        )
+        return {
+            "text": (response.choices[0].message.content or "").strip(),
+            "target": target,
+            "source": source or "en",
+            "mode": "llm",
+        }

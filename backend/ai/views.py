@@ -24,3 +24,23 @@ class TranscribeView(APIView):
             user=request.user, audio_bytes=audio.read(), language=language
         )
         return Response({"text": result.get("text", ""), "language": result.get("language", language)})
+
+
+class TranslateView(APIView):
+    """POST {text, target, source?} — translate free text (PRD §45, quota'd ai_text)."""
+
+    permission_classes = [IsAuthenticatedActive]
+    throttle_scope = "ai"
+
+    def post(self, request):
+        orchestrator.enforce_quota(user=request.user, scope="ai_text")
+        payload = request.data or {}
+        text = str(payload.get("text", "")).strip()
+        if not text:
+            raise AppError("Text to translate is required.", code="text_required")
+        if len(text) > 2000:
+            raise AppError("Text must be under 2000 characters.", code="text_too_long")
+        target = str(payload.get("target", "hi") or "hi")[:8]
+        source = str(payload.get("source", "") or "")[:8]
+        result = orchestrator.translate(user=request.user, text=text, target=target, source=source)
+        return Response(result)

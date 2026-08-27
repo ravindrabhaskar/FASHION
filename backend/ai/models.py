@@ -14,6 +14,9 @@ class AIUsageLog(TimeStampedUUIDModel):
         DESIGNER_CHAT = "designer_chat", "Conversational designer"
         OUTFIT_IMAGE = "outfit_image", "Outfit image generation"
         WARDROBE_EXTRACT = "wardrobe_extract", "Wardrobe attribute extraction"
+        TRANSCRIBE = "transcribe", "Voice transcription"
+        TRANSLATE = "translate", "Text translation"
+        TRYON = "tryon", "Virtual try-on"
 
     class Status(models.TextChoices):
         SUCCESS = "SUCCESS", "Success"

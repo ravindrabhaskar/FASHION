@@ -246,6 +246,33 @@ class MockAIProvider:
             "duration_seconds": max(1, len(audio_bytes) // 16000),
         }
 
+    # ---- Multilingual ---------------------------------------------------
+    def translate(self, *, text: str, target: str, source: str = "") -> dict:
+        """Deterministic translation for the offline mock.
+
+        Known UI strings are translated from the static catalog; everything
+        else passes through tagged with the target locale. Capable providers
+        (openai-compatible) replace this entirely.
+        """
+        from fashion.i18n import STRINGS
+
+        source = (source or "en").lower()[:8]
+        target_key = (target or source).lower()[:8]
+        if target_key == source or target_key not in STRINGS:
+            return {"text": text, "target": target_key, "source": source, "mode": "pass-through"}
+        # Exact match against an English UI string → localize from the catalog.
+        en_by_value = {value: key for key, value in STRINGS["en"].items()}
+        stripped = text.strip()
+        if stripped in en_by_value:
+            key = en_by_value[stripped]
+            return {
+                "text": STRINGS.get(target_key, {}).get(key, text),
+                "target": target_key,
+                "source": source,
+                "mode": "dict",
+            }
+        return {"text": text, "target": target_key, "source": source, "mode": "pass-through"}
+
     # ---- Wardrobe -------------------------------------------------------
     def recommend_from_wardrobe(self, *, occasion: str | None, budget_inr: int | None,
                                 wardrobe_summary: list[dict],

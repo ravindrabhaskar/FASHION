@@ -5,8 +5,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { Screen } from '@/components/ui/Screen';
 import { colors, spacing, typography } from '@/theme/tokens';
-import { plansApi, profileApi } from '@/api/endpoints';
-import type { Entitlements, StyleProfile } from '@/api/types';
+import { plansApi, profileApi, xpApi } from '@/api/endpoints';
+import type { Entitlements, StyleProfile, XPDashboard } from '@/api/types';
 import { useAuth } from '@/state/auth';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -15,10 +15,12 @@ export default function ProfileScreen() {
   const { user, signOutAll, refreshUser } = useAuth();
   const [styleProfile, setStyleProfile] = useState<StyleProfile | null>(null);
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
+  const [xp, setXp] = useState<XPDashboard | null>(null);
 
   useEffect(() => {
     profileApi.getStyleProfile().then(setStyleProfile).catch(() => undefined);
     plansApi.entitlements().then(setEntitlements).catch(() => undefined);
+    xpApi.me().then(setXp).catch(() => undefined);
   }, []);
 
   const confirmSignOut = () =>
@@ -37,6 +39,21 @@ export default function ProfileScreen() {
             <Text style={styles.roleText}>{user?.role ?? 'USER'}</Text>
           </View>
         </Card>
+
+        {xp && (
+          <Card style={{ marginTop: spacing.lg }}>
+            <Text style={styles.sectionTitle}>XP & Level</Text>
+            <Text style={styles.body}>
+              Level: <Text style={{ color: colors.gold }}>{xp.level}</Text> · {xp.total_xp.toLocaleString()} XP
+            </Text>
+            <Button
+              label="View XP dashboard"
+              variant="ghost"
+              onPress={() => navigation.navigate('XPDashboard')}
+              style={{ marginTop: spacing.md }}
+            />
+          </Card>
+        )}
 
         <Card style={{ marginTop: spacing.lg }}>
           <Text style={styles.sectionTitle}>Style profile</Text>
@@ -80,6 +97,16 @@ export default function ProfileScreen() {
 
         <Button label="My saved looks" variant="ghost" style={{ marginTop: spacing.lg }} onPress={() => navigation.navigate('SavedLooks')} />
         <Button label="AI Designer chat" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('DesignerChat', {})} />
+        <Button label="My orders" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Orders')} />
+        <Button label="Messages" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('ChatList')} />
+        <Button label="Browse designers" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Designers')} />
+        <Button label="Custom quotes" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Quotes')} />
+        <Button label="My products & listings" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('MyProducts')} />
+        <Button label="Brands" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Brands')} />
+        <Button label="Creators & campaigns" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Creators')} />
+        <Button label="Trending now" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Trends')} />
+        <Button label="Virtual try-on" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('TryOn', {})} />
+        <Button label="App language" variant="ghost" style={{ marginTop: spacing.md }} onPress={() => navigation.navigate('Language')} />
         <Button
           label="Refresh profile"
           variant="ghost"

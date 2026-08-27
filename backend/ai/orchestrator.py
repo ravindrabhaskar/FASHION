@@ -236,7 +236,7 @@ def transcribe(*, user, audio_bytes: bytes, language: str = "en") -> dict:
     try:
         result = provider.transcribe(audio_bytes=audio_bytes, language=language)
         latency = int((time.monotonic() - start) * 1000)
-        _log_usage(user=user, feature=AIUsageLog.Feature.WARDROBE_EXTRACT,
+        _log_usage(user=user, feature=AIUsageLog.Feature.TRANSCRIBE,
                    provider=provider.name, model=getattr(provider, "model_name", ""),
                    latency_ms=latency, request_hash=_request_hash("transcribe", len(audio_bytes)))
         return result
@@ -248,6 +248,42 @@ def transcribe(*, user, audio_bytes: bytes, language: str = "en") -> dict:
             raise AppError("Voice input is unavailable right now.",
                            code="ai_unavailable", status_code=503) from exc
         return MockAIProvider().transcribe(audio_bytes=audio_bytes, language=language)
+
+
+def translate(*, user, text: str, target: str, source: str = "") -> dict:
+    """Free-form text → target locale via the translation-capable provider."""
+    safety.check_input_safety(text)
+    rh = _request_hash("translate", text.strip().lower()[:240], target, source)
+
+    cached, _, _ = _cached_or_duplicate("translate", rh)
+    if cached is not None:
+        _log_usage(user=user, feature=AIUsageLog.Feature.TRANSLATE, provider=_provider().name,
+                   status=AIUsageLog.Status.CACHED, cache_hit=True, request_hash=rh)
+        return cached
+
+    start = time.monotonic()
+    provider = _provider()
+    try:
+        result = provider.translate(text=text, target=target, source=source)
+        latency = int((time.monotonic() - start) * 1000)
+        _store_cache("translate", rh, result)
+        _log_usage(user=user, feature=AIUsageLog.Feature.TRANSLATE, provider=provider.name,
+                   model=getattr(provider, "model_name", ""), latency_ms=latency,
+                   request_hash=rh)
+        return result
+    except AppError:
+        raise
+    except Exception as exc:
+        logger.exception("Translation failed; using mock fallback")
+        if isinstance(provider, MockAIProvider):
+            raise AppError("Translation is unavailable right now.",
+                           code="ai_unavailable", status_code=503) from exc
+        result = MockAIProvider().translate(text=text, target=target, source=source)
+        _store_cache("translate", rh, result)
+        _log_usage(user=user, feature=AIUsageLog.Feature.TRANSLATE,
+                   provider=f"{provider.name}+mock-fallback", status=AIUsageLog.Status.FAILED,
+                   error=str(exc)[:255], request_hash=rh)
+        return result
 
 
 def extract_wardrobe_attributes(*, user, image_bytes: bytes):

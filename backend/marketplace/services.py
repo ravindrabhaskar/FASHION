@@ -206,6 +206,7 @@ def product_payload(product: Product) -> dict:
         "is_customizable": product.is_customizable,
         "ready_to_ship": product.ready_to_ship,
         "in_stock": product.stock > 0 or bool(product.variants.count()),
+        "seller_user_id": str(product.seller_user_id),
         "seller_type": ("designer" if product.designer else "brand" if product.brand else ""),
         "seller_name": (product.designer.studio_name if product.designer
                         else product.brand.name if product.brand else ""),

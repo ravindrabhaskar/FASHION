@@ -27,4 +27,6 @@ urlpatterns = [
         name="designer-materialize",
     ),
     path("outfits/<uuid:outfit_id>/tryon", views.TryOnView.as_view(), name="outfit-tryon"),
+    path("trends", views.TrendsView.as_view(), name="fashion-trends"),
+    path("i18n/strings", views.I18nStringsView.as_view(), name="fashion-i18n-strings"),
 ]

@@ -3,7 +3,7 @@
 Live tracker. Statuses: `NOT_STARTED · IN_PROGRESS · BLOCKED · IMPLEMENTED · TESTED · PRODUCTION_READY`
 "IMPLEMENTED" = functional vertical slice. "TESTED" = validated via tests. "PRODUCTION_READY" = security/UX/errors/tests/ops complete.
 
-Last updated: Phase 2 implemented (session 2).
+Last updated: Phase 7 implemented + verified (session 2c). Backend: 60 tests green, `manage.py check` clean. Mobile: `tsc --noEmit` clean.
 
 ## Legend
 - Domain key: B=backend app, M=mobile app, A=admin, I=infra/docs
@@ -57,16 +57,59 @@ Last updated: Phase 2 implemented (session 2).
 | M: Home cards wired to Stylist/Designer/Wardrobe destinations | IMPLEMENTED | was placeholder content |
 
 ## Phase 3 — Social + FashionXP
-NOT_STARTED
+Backend fully implemented/tracked under `backend/social`; mobile feature set complete.
+
+| Item | Status | Notes |
+|---|---|---|
+| M: Social feed, post detail, comments, create post (photo/camera, AI caption suggestions) | IMPLEMENTED | `SocialFeed`, `PostDetail` (reply + report + shop-the-look), `CreatePost` |
+| M: Public profile + follow + saved posts | IMPLEMENTED | `PublicProfile` |
+| M: XP dashboard, leaderboard, challenges + enrollment, rewards + redemption | IMPLEMENTED | `XPDashboard/Leaderboard/Challenges/ChallengeDetail/Rewards` |
+| M: Notification inbox + unread badge + device token registration | IMPLEMENTED | badge polls every 30s; token registered on sign-in/session restore |
+| M: Moderation — report content | IMPLEMENTED | `ReportScreen` posts to `/social/reports` |
 
 ## Phase 4 — Local Fashion (designers, brands, products, search, shop-this-look)
-NOT_STARTED
+Backend fully implemented/tracked; mobile feature set complete.
+
+| Item | Status | Notes |
+|---|---|---|
+| M: Marketplace (categories, semantic search via `/marketplace/search`) | IMPLEMENTED | `Marketplace` tab |
+| M: Product detail — buy now, request custom quote, chat with seller, variant select | IMPLEMENTED | `ProductDetail`; buy → order → payment |
+| M: Become designer / designer directory + studio page (products grid) | IMPLEMENTED | `BecomeDesigner`, `Designers`, `DesignerDetail` |
+| M: Brands — directory, become brand, brand storefront | IMPLEMENTED | `Brands`, `BecomeBrand`, `BrandDetail` |
+| M: Sell — my products list, create/edit/delete product (with photo upload) | IMPLEMENTED | `MyProducts`, `CreateProduct` |
+| M: Shop-the-look on posts | IMPLEMENTED | rendered from `/marketplace/posts/:id/shop` |
 
 ## Phase 5 — Marketplace (quotes, orders, payments, chat)
-NOT_STARTED
+Backend fully implemented/tracked; mobile feature set complete.
+
+| Item | Status | Notes |
+|---|---|---|
+| B: Catalog direct purchase endpoint (`POST /marketplace/products/:id/buy`) | IMPLEMENTED | added session 2; creates order via `OrderService.create_from_catalog` |
+| M: Quote request, quote list/detail, offer accept → order | IMPLEMENTED | `QuoteRequestScreen`, `Quotes`, `QuoteDetail` |
+| M: Orders list/detail with status machine transitions | IMPLEMENTED | matches backend statuses (CREATED→…→COMPLETED/REFUNDED) |
+| M: Payment/checkout + mock gateway initiate/confirm | IMPLEMENTED | `PaymentScreen` |
+| M: Chat list/thread + start-from-product thread | IMPLEMENTED | `ChatList`, `ChatThread` |
 
 ## Phase 6 — Creator Economy (campaigns, affiliates, advanced rewards)
-NOT_STARTED
+Backend fully implemented/tracked; mobile feature set complete.
+
+| Item | Status | Notes |
+|---|---|---|
+| M: Become creator + eligibility check | IMPLEMENTED | `BecomeCreator`, `Creators` dashboard |
+| M: Campaigns browse + apply, brand create + review applications | IMPLEMENTED | `Campaigns`, `CampaignDetail`, `CreateCampaign` |
 
 ## Phase 7 — Advanced AI (try-on, voice, trends, multilingual)
-NOT_STARTED
+
+| Item | Status | Notes |
+|---|---|---|
+| B: trends engine GET /fashion/trends (colors/fabrics/categories/hashtags/cities) | TESTED | deterministic, no AI spend; hashtags parsed from post captions |
+| B: multilingual catalog GET /fashion/i18n/strings + POST /ai/translate | TESTED | 9 locales (en hi bn ta te mr gu kn ur), quota'd; dict → pass-through → LLM fallback |
+| B: virtual try-on POST /fashion/outfits/:id/tryon (mock image generator + queued job) | TESTED | flag `virtual_tryon` now enabled by default |
+| B: voice transcription POST /ai/transcribe (mock + real/provider paths) | TESTED | feature logged as TRANSCRIBE |
+| B: product photo replacement via PATCH (multipart) | TESTED | `ProductDetailView` takes photo, replaces/creates ProductImage |
+| M: Trends screen + Home/Profile entry points | IMPLEMENTED | chips jump to Shop tab |
+| M: Virtual try-on screen (pick saved look → generate → poll) | IMPLEMENTED | `TryOn` + Home/Profile entries |
+| M: Language screen + i18n hook (fetch strings, persist, patch profile) | IMPLEMENTED | `I18nProvider` wraps app; English fallback |
+| M: SMS OTP + Google/Apple sign-in on Login | IMPLEMENTED | dev_code surfaced in DEBUG; social needs client id config |
+| M: Voice caption input (expo-av record → transcribe) | IMPLEMENTED | CreatePost mic button |
+| M: Expo push token registration with fallback | IMPLEMENTED | native token → stable per-install id |

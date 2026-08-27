@@ -65,6 +65,66 @@ export function Card({ children, style }: { children: React.ReactNode; style?: V
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
+export function SectionHeader({
+  eyebrow,
+  title,
+  action,
+  onAction,
+}: {
+  eyebrow?: string;
+  title: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <View style={styles.sectionHeader}>
+      <View style={{ flex: 1 }}>
+        {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      {action ? (
+        <TouchableOpacity accessibilityRole="button" onPress={onAction} style={styles.textAction}>
+          <Text style={styles.textActionLabel}>{action}</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+}
+
+export function Metric({ value, label }: { value: string | number; label: string }) {
+  return (
+    <View style={styles.metric}>
+      <Text style={styles.metricValue}>{value}</Text>
+      <Text style={styles.metricLabel}>{label}</Text>
+    </View>
+  );
+}
+
+export function ActionRow({
+  icon,
+  title,
+  subtitle,
+  onPress,
+  destructive,
+}: {
+  icon: string;
+  title: string;
+  subtitle?: string;
+  onPress?: () => void;
+  destructive?: boolean;
+}) {
+  return (
+    <TouchableOpacity accessibilityRole="button" activeOpacity={0.72} onPress={onPress} style={styles.actionRow}>
+      <View style={styles.actionIcon}><Text style={styles.actionIconText}>{icon}</Text></View>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.actionTitle, destructive && { color: colors.danger }]}>{title}</Text>
+        {subtitle ? <Text numberOfLines={1} style={styles.actionSubtitle}>{subtitle}</Text> : null}
+      </View>
+      <Text style={styles.actionChevron}>›</Text>
+    </TouchableOpacity>
+  );
+}
+
 // ---- Chip ------------------------------------------------------------------
 
 export function Chip({
@@ -158,6 +218,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: spacing.lg,
   },
+  sectionHeader: { alignItems: 'flex-end', flexDirection: 'row', marginBottom: spacing.md },
+  eyebrow: { ...typography.eyebrow, color: colors.gold, marginBottom: spacing.xs },
+  sectionTitle: { ...typography.h2, color: colors.textPrimary },
+  textAction: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
+  textActionLabel: { ...typography.small, color: colors.gold, fontWeight: '700' },
+  metric: { flex: 1, minWidth: 86 },
+  metricValue: { ...typography.h2, color: colors.textPrimary },
+  metricLabel: { ...typography.micro, color: colors.textMuted, marginTop: 2, textTransform: 'uppercase' },
+  actionRow: { alignItems: 'center', borderBottomColor: colors.inkBorder, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row', minHeight: 70, paddingVertical: spacing.md },
+  actionIcon: { alignItems: 'center', backgroundColor: colors.goldFaint, borderColor: colors.goldSoft, borderRadius: radii.md, borderWidth: 1, height: 42, justifyContent: 'center', marginRight: spacing.md, width: 42 },
+  actionIconText: { color: colors.gold, fontSize: 18, fontWeight: '700' },
+  actionTitle: { ...typography.h3, color: colors.textPrimary },
+  actionSubtitle: { ...typography.small, color: colors.textMuted, marginTop: 2 },
+  actionChevron: { color: colors.textMuted, fontSize: 28, marginLeft: spacing.sm },
   chip: {
     backgroundColor: colors.inkElevated,
     borderColor: colors.inkBorder,

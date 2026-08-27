@@ -8,6 +8,7 @@ export const colors = {
   inkElevated: '#141419',
   inkCard: '#1B1B22',
   inkBorder: '#2A2A33',
+  inkSubtle: '#101014',
 
   // Text
   textPrimary: '#F5F1EA',
@@ -16,7 +17,9 @@ export const colors = {
 
   // Accent — warm champagne gold (fashion house feel)
   gold: '#C9A96E',
+  goldBright: '#E4C98F',
   goldSoft: 'rgba(201, 169, 110, 0.16)',
+  goldFaint: 'rgba(201, 169, 110, 0.08)',
   blush: '#D9A5A0',
   sage: '#9CAF88',
 
@@ -36,23 +39,26 @@ export const spacing = {
   lg: 16,
   xl: 24,
   xxl: 32,
+  xxxl: 48,
 } as const;
 
 export const radii = {
   sm: 10,
   md: 16,
   lg: 24,
+  xl: 32,
   pill: 999,
 } as const;
 
 export const typography = {
-  display: { fontSize: 32, fontWeight: '700' as const, letterSpacing: -0.5 },
+  display: { fontSize: 34, fontWeight: '700' as const, letterSpacing: -0.8 },
   h1: { fontSize: 26, fontWeight: '700' as const, letterSpacing: -0.3 },
   h2: { fontSize: 20, fontWeight: '600' as const },
   h3: { fontSize: 16, fontWeight: '600' as const },
   body: { fontSize: 15, fontWeight: '400' as const, lineHeight: 22 },
   small: { fontSize: 13, fontWeight: '400' as const, lineHeight: 18 },
   micro: { fontSize: 11, fontWeight: '500' as const, letterSpacing: 0.6 },
+  eyebrow: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 1.5, textTransform: 'uppercase' as const },
 };
 
 export const shadow = {

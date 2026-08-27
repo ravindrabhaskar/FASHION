@@ -75,6 +75,21 @@ class ProductDetailView(APIView):
             if field in payload:
                 setattr(product, field, bool(payload[field]))
         product.save()
+        # Optional photo replacement (multipart PATCH).
+        photo = request.FILES.get("photo")
+        if photo:
+            from marketplace.models import ProductImage
+
+            image_bytes = _validate_image_upload(photo)
+            from wardrobe.services import _content_file, _ext_for
+
+            img = product.images.first()
+            if img is None:
+                img = ProductImage(product=product, alt=product.title[:160])
+            img.alt = product.title[:160]
+            img.image.save(f"products/{product.id}{_ext_for(getattr(photo, 'name', 'x.jpg'))}",
+                           _content_file(image_bytes))
+            img.save()
         return Response(product_payload(product))
 
     def delete(self, request, product_id):
@@ -230,6 +245,26 @@ class QuoteAcceptView(APIView):
         order = QuoteService.accept(request.user, offer)
         from orders.services import order_payload
 
+        return Response(order_payload(order), status=status.HTTP_201_CREATED)
+
+
+class CatalogPurchaseView(APIView):
+    """POST — create an order to buy a ready-to-ship product directly."""
+
+    permission_classes = [IsAuthenticatedActive]
+
+    def post(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        payload = request.data or {}
+        try:
+            quantity = int(payload.get("quantity") or 1)
+        except (TypeError, ValueError):
+            quantity = 1
+        from orders.services import OrderService, order_payload
+
+        order = OrderService.create_from_catalog(
+            request.user, product, quantity=quantity
+        )
         return Response(order_payload(order), status=status.HTTP_201_CREATED)
 
 

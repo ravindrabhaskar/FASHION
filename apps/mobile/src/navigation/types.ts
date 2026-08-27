@@ -1,8 +1,56 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 export type RootStackParamList = {
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   SavedLooks: undefined;
   DesignerChat: { conversationId?: string; occasion?: string };
+  Trends: undefined;
+  TryOn: { outfitId?: string };
+  Language: undefined;
   Login: undefined;
   Register: undefined;
   Onboarding: undefined;
+  SocialFeed: undefined;
+  PostDetail: { postId: string };
+  CreatePost: { outfitId?: string };
+  PublicProfile: { userId: string };
+  Notifications: undefined;
+  XPDashboard: undefined;
+  Leaderboard: { scope?: string; challenge?: string };
+  Challenges: undefined;
+  ChallengeDetail: { challengeId: string };
+  Rewards: undefined;
+  Marketplace: undefined;
+  ProductDetail: { productId: string };
+  Orders: undefined;
+  OrderDetail: { orderId: string };
+  ChatList: undefined;
+  ChatThread: { threadId: string; subject: string };
+  Designers: undefined;
+  DesignerDetail: { slug: string };
+  BecomeDesigner: undefined;
+  Brands: undefined;
+  BrandDetail: { slug: string };
+  BecomeBrand: undefined;
+  MyProducts: undefined;
+  CreateProduct: { productId?: string };
+  Creators: undefined;
+  BecomeCreator: undefined;
+  Campaigns: undefined;
+  CampaignDetail: { campaignId: string };
+  CreateCampaign: undefined;
+  Quotes: undefined;
+  QuoteRequestScreen: { productId?: string; designerSlug?: string; outfitId?: string };
+  QuoteDetail: { requestId: string };
+  Payment: { orderId: string };
+  Report: { targetType: 'POST' | 'COMMENT' | 'USER'; targetId: string };
+};
+
+export type MainTabParamList = {
+  Home: undefined;
+  Social: undefined;
+  Stylist: undefined;
+  Shop: undefined;
+  Wardrobe: undefined;
+  Profile: undefined;
 };

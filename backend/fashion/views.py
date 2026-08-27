@@ -296,11 +296,11 @@ class TryOnView(APIView):
     permission_classes = [IsAuthenticatedActive]
     throttle_scope = "ai"
 
-    def post(self, request):
-        if not is_enabled("virtual_tryon", default=False):
+    def post(self, request, outfit_id: str | None = None):
+        if not is_enabled("virtual_tryon", default=True):
             raise AppError("Virtual try-on is rolling out soon.", code="feature_disabled")
         orchestrator.enforce_quota(user=request.user, scope="ai_image")
-        outfit_id = (request.data or {}).get("outfit_id", "")
+        outfit_id = outfit_id or (request.data or {}).get("outfit_id", "")
         base = get_object_or_404(GeneratedOutfit, id=outfit_id, user=request.user)
 
         garment = ", ".join(
@@ -322,6 +322,7 @@ class TryOnView(APIView):
             image_prompt=prompt,
         )
         StylistService.request_image_job(tryon_outfit)
+        tryon_outfit.refresh_from_db()  # eager workers may complete synchronously
         record_event(user=request.user, name="tryon_requested",
                      properties={"outfit_id": str(base.id), "tryon_id": str(tryon_outfit.id)})
         return Response(_outfit_payload(tryon_outfit), status=status.HTTP_202_ACCEPTED)
@@ -386,3 +387,33 @@ def _conversation_detail(conversation: AIConversation) -> dict:
         "messages": messages,
         "updated_at": conversation.updated_at,
     }
+
+
+# ---- Trends + multilingual (Phase 7) ---------------------------------------
+
+
+class TrendsView(APIView):
+    """GET — deterministic fashion trends snapshot (colors, fabrics, categories)."""
+
+    permission_classes = [IsAuthenticatedActive]
+
+    def get(self, request):
+        from fashion.trends import trend_snapshot
+
+        return Response(trend_snapshot(limit=_safe_int(request.query_params.get("limit")) or 8))
+
+
+class I18nStringsView(APIView):
+    """GET ?lang=xx — localized UI strings for the mobile app (PRD §45)."""
+
+    permission_classes = [IsAuthenticatedActive]
+
+    def get(self, request):
+        from fashion.i18n import SUPPORTED_LANGUAGES, strings_for
+
+        locale = str(request.query_params.get("lang", ""))[:8] or "en"
+        return Response({
+            "locale": locale,
+            "supported": SUPPORTED_LANGUAGES,
+            "strings": strings_for(locale),
+        })

@@ -10,4 +10,5 @@ urlpatterns = [
     path("quotes", views.QuoteRequestView.as_view(), name="quotes"),
     path("quotes/<uuid:request_id>/offers", views.QuoteOfferView.as_view(), name="quote-offers"),
     path("offers/<uuid:offer_id>/accept", views.QuoteAcceptView.as_view(), name="quote-accept"),
+    path("products/<uuid:product_id>/buy", views.CatalogPurchaseView.as_view(), name="product-buy"),
 ]

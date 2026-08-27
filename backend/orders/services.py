@@ -36,6 +36,8 @@ def order_payload(order: Order) -> dict:
         "variant_snapshot": order.variant_snapshot,
         "product_id": str(order.product_id) if order.product_id else None,
         "seller_user_id": str(order.seller_user_id),
+        "seller_name": order.seller_user.full_name if order.seller_user_id else "",
+        "customer_name": order.customer.full_name if order.customer_id else "",
         "shipping_address": order.shipping_address,
         "notes": order.notes,
         "created_at": order.created_at,
@@ -63,6 +65,40 @@ class OrderService:
                    note=f"From offer ₹{offer.price_inr}")
         record_event(user=user, name="order_created",
                      properties={"order_id": str(order.id), "amount_inr": order.amount_inr})
+        return order
+
+    @staticmethod
+    def create_from_catalog(user, product, *, quantity: int = 1) -> Order:
+        """Buy a ready-to-ship product directly from the catalog."""
+        from core.services import get_config
+
+        if not getattr(product, "is_active", True):
+            raise AppError("That product isn't available.", code="product_inactive")
+        if product.stock < quantity:
+            raise AppError("Not enough stock.", code="insufficient_stock")
+        quantity = max(1, min(int(quantity), product.stock))
+        commission_pct = float(get_config("marketplace.commission_percent", 12) or 12)
+        amount = product.price_inr * quantity
+        order = Order.objects.create(
+            customer=user,
+            seller_user=product.seller_user,
+            designer=product.designer,
+            brand=product.brand,
+            product=product,
+            title_snapshot=product.title[:160],
+            quantity=quantity,
+            amount_inr=amount,
+            commission_inr=int(amount * commission_pct / 100),
+            status=Order.Status.CREATED,
+        )
+        _log_event(order, to_status=Order.Status.CREATED, created_by=user,
+                   note="From catalog purchase")
+        record_event(user=user, name="order_created",
+                     properties={"order_id": str(order.id), "amount_inr": amount})
+        from notifications.services import notify
+
+        notify(user, type="order", title="Order created 🧾",
+               body=product.title[:100], data={"order_id": str(order.id)})
         return order
 
     @staticmethod
